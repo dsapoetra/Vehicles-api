@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 
-import com.udacity.vehicles.utils.BeanMapper;
 import ma.glasnost.orika.MapperFacade;
 import ma.glasnost.orika.MapperFactory;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
