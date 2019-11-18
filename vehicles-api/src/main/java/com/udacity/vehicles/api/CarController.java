@@ -5,6 +5,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 import com.udacity.vehicles.domain.car.Car;
+import com.udacity.vehicles.domain.car.CarRequest;
 import com.udacity.vehicles.service.CarService;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -12,6 +13,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 
+import com.udacity.vehicles.utils.BeanMapper;
+import ma.glasnost.orika.MapperFacade;
+import ma.glasnost.orika.MapperFactory;
+import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +38,10 @@ class CarController {
 
     private final CarService carService;
     private final CarResourceAssembler assembler;
+
+    private static MapperFactory mapperFactory = (new DefaultMapperFactory.Builder()).build();
+    private static MapperFacade mapper = mapperFactory.getMapperFacade();
+
 
     CarController(CarService carService, CarResourceAssembler assembler) {
         this.carService = carService;
@@ -69,17 +78,18 @@ class CarController {
 
     /**
      * Posts information to create a new vehicle in the system.
-     * @param car A new vehicle to add to the system.
+     * @param carRequest A new vehicle to add to the system.
      * @return response that the new vehicle was added to the system
      * @throws URISyntaxException if the request contains invalid fields or syntax
      */
     @PostMapping
-    ResponseEntity<?> post(@Valid @RequestBody Car car) throws URISyntaxException {
+    ResponseEntity<?> post(@Valid @RequestBody CarRequest carRequest) throws URISyntaxException {
         /**
          * TODO: Use the `save` method from the Car Service to save the input car.
          * TODO: Use the `assembler` on that saved car and return as part of the response.
          *   Update the first line as part of the above implementing.
          */
+        Car car = mapper.map(carRequest, Car.class);
         Resource<Car> resource = assembler.toResource(carService.save(car));
         return ResponseEntity.created(new URI(resource.getId().expand().getHref())).body(resource);
     }
@@ -87,11 +97,11 @@ class CarController {
     /**
      * Updates the information of a vehicle in the system.
      * @param id The ID number for which to update vehicle information.
-     * @param car The updated information about the related vehicle.
+     * @param carRequest The updated information about the related vehicle.
      * @return response that the vehicle was updated in the system
      */
     @PutMapping("/{id}")
-    ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody Car car) {
+    ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody CarRequest carRequest) {
         /**
          * TODO: Set the id of the input car object to the `id` input.
          * TODO: Save the car using the `save` method from the Car service
@@ -99,6 +109,7 @@ class CarController {
          *   Update the first line as part of the above implementing.
          */
 
+        Car car = mapper.map(carRequest, Car.class);
         car.setId(id);
         car = carService.save(car);
         Resource<Car> resource = assembler.toResource(car);
